@@ -1,34 +1,44 @@
-import {useState} from 'react'
+import {useState , useEffect} from 'react'
 import axios from 'axios'
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, useParams} from 'react-router-dom'
 
-const ProductForm = (props) => {
+const UpdateForm = (props) => {
+
+    const {id} = useParams()
     const navigate = useNavigate()
+
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
     const [price, setPrice] = useState("")
 
-    const SubmitHandler = (e) => {
+    useEffect(() => {
+        axios.get(`http://localhost:8000/api/products/${id}`)
+            .then((res)=>{
+                console.log(res)
+                console.log(res.data)
+                setTitle(res.data.title)
+                setDescription(res.data.description)
+                setPrice(res.data.price)
+            }).catch((err)=>console.log(err))
+    },[])
+
+    const updateProduct = (e) => {
         e.preventDefault()
-        axios.post('http://localhost:8000/api/products',{
+        axios.put(`http://localhost:8000/api/products/${id}`,{
             title,
             description,
             price
-        }).then((res)=>{
+        }).then(res=>{
             console.log(res)
-            console.log(res.data)
-            setTitle("")
-            setDescription("")
-            setPrice("")
             navigate("/all")
-
         }).catch((err)=>console.log(err))
     }
 
+
     return(
         <div>
-            <h1>Create Product</h1>
-            <form onSubmit={SubmitHandler}>
+            <h1>Update Product</h1>
+            <form onSubmit={updateProduct}>
                 <div className='form-group'>
                     <label className="col-sm-1 col-form-label">Title</label>
                     <input className="col-sm-2 col-form" type="text" name="title" value={title} onChange={(e)=>setTitle(e.target.value)}/>
@@ -42,11 +52,11 @@ const ProductForm = (props) => {
                     <input className="col-sm-2 col-form" type="number" name="price" value={price} onChange={(e)=>setPrice(e.target.value)}/>
                 </div>
                 <div className="col-sm-10 offset-sm-1">
-                    <button type="submit" className="btn btn-primary">Create</button>
+                    <button type="submit" className="btn btn-primary">Update</button>
                 </div>
             </form>
         </div>
     )
 }
 
-export default ProductForm
+export default UpdateForm
